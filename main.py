@@ -1,16 +1,19 @@
-from PyQt5 import uic, QtGui, QtCore
-from PyQt5.QtWidgets import QMainWindow, QTableWidget, QApplication, QTableWidgetItem, QDialog, QInputDialog, \
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QMainWindow, QApplication, QTableWidgetItem, QDialog, QInputDialog, \
     QDialogButtonBox, QLabel
 import sqlite3
+from main_ui import Ui_MainWindow
+from addEditCoffeeForm_ui import Ui_Dialog
 
 
-class Example(QMainWindow):
+class Example(QMainWindow, Ui_MainWindow):
     def __init__(self):
-        super().__init__()
-        uic.loadUi('main.ui', self)
-        self.table = self.tableWidget
+        super(Example, self).__init__()
+        self.setupUi(self)
+        # uic.loadUi('main.ui', self)
+        # self.table = self.tableWidget
 
-        table = self.table
+        table = self.tableWidget
         table.setColumnCount(7)
         table.setRowCount(1)  # change later
 
@@ -21,13 +24,13 @@ class Example(QMainWindow):
         self.show_table()
 
     def show_table(self):
-        table = self.table
+        table = self.tableWidget
         # table.setColumnCount(7)
         # table.setRowCount(1)  # change later
         #
         # table.setHorizontalHeaderLabels(["ID", "sort", "roasting", "in grains", "taste", "price", "size"])
 
-        with sqlite3.connect('coffee.db') as con:
+        with sqlite3.connect('data/coffee.db') as con:
             cur = con.cursor()
 
             result = list(cur.execute(f"""SELECT * FROM coffee"""))
@@ -54,7 +57,7 @@ class Example(QMainWindow):
             # print('complted')
             sort, roasting, in_grains, taste, price, size = form.get_values()
             # print('here')
-            with sqlite3.connect('coffee.db') as con:
+            with sqlite3.connect('data/coffee.db') as con:
                 cur = con.cursor()
 
                 cur.execute(f"""INSERT INTO coffee(sort, roasting, in_grains, taste, price, size) 
@@ -67,7 +70,7 @@ class Example(QMainWindow):
         if form.exec_():
             sort, roasting, in_grains, taste, price, size = form.get_values()
             id = form.get_id()
-            with sqlite3.connect('coffee.db') as con:
+            with sqlite3.connect('data/coffee.db') as con:
                 cur = con.cursor()
 
                 cur.execute(f"""UPDATE coffee
@@ -82,7 +85,7 @@ WHERE id = {id}""")
         if form.exec_():
             id = form.return_id()
             # print(id, 'here')
-            with sqlite3.connect('coffee.db') as con:
+            with sqlite3.connect('data/coffee.db') as con:
                 cur = con.cursor()
 
                 cur.execute(f"""DELETE FROM coffee
@@ -92,10 +95,11 @@ WHERE ID = {id}""")
             self.show_table()
 
 
-class SecondWindow(QDialog):
+class SecondWindow(QDialog, Ui_Dialog):
     def __init__(self, parent=None):
         super(SecondWindow, self).__init__(parent)
-        uic.loadUi('addEditCoffeeForm.ui', self)
+        self.setupUi(self)
+        # uic.loadUi('addEditCoffeeForm.ui', self)
         self.comboBox.addItems(['молотый', 'в зернах'])
         # self.ok_button.clicked.connect(self.got_close_signal)
         # self.cancel_button.clicked.connect(self.got_close_signal)
@@ -134,7 +138,7 @@ class ThirdWindow(SecondWindow):
         if ok:
             self.id = text
             # print('here')
-            with sqlite3.connect('coffee.db') as con:
+            with sqlite3.connect('data/coffee.db') as con:
                 cur = con.cursor()
 
                 result = list(cur.execute(f"""SELECT sort, roasting, in_grains, taste, price, size 
@@ -177,7 +181,7 @@ class FourthWindow(QDialog):
             ok.clicked.connect(self.accepted)
             cancel.clicked.connect(self.rejected)
             butonbox.setGeometry(0, 25, 200, 25)
-            with sqlite3.connect('coffee.db') as con:
+            with sqlite3.connect('data/coffee.db') as con:
                 cur = con.cursor()
 
                 result = list(cur.execute(f"""SELECT sort, roasting, in_grains, taste, price, size 
